@@ -22,11 +22,11 @@ class MainWindow(QMainWindow):
 
         # Dealer Section at the top
         self.dealerLabel = QLabel("Dealer Hand :")
-        self.dealerCardsLayout = QVBoxLayout()  # QV : vertical layout  || QH : horizontal layout
+        self.dealerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
 
         # Player section at the bottom
         self.playerLabel = QLabel("Player Hand :")
-        self.playerCardsLayout = QVBoxLayout()  # QV : vertical layout  || QH : horizontal layout
+        self.playerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
 
         # Buttons at the bottom of the screen
         buttonsLayout = QHBoxLayout()
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.standBtn.clicked.connect(self.on_stand)    # Connects btn to "eventHandler"
 
         self.newRowndBtn = QPushButton("New Round")     # Declares newRound button
-        self.newRowndBtn.clicked.connect(self.new_round_setup)  # Connects btn to "eventHandler"
+        self.newRowndBtn.clicked.connect(self.on_new_round)  # Connects btn to "eventHandler"
 
 
         # Adding buttons and other sections to the layout
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
 
         container.setLayout(mainLayout)
         self.setCentralWidget(container)
-        self.initUI()
+       # self.initUI()
 
     def initUI(self):
         # Create and arrange widgets and layout. Remove pass when complete.
