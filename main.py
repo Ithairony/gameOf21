@@ -1,21 +1,61 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QHBoxLayout, QPushButton, QWidget, QVBoxLayout
 from PyQt6.QtCore import Qt
 import sys
 
 # this project should use a modular approach - try to keep UI logic and game logic separate
-from game_logic import Game21
+from gameLogic import Game21
 
 class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+
+        # Window settings
         self.setWindowTitle("Game of 21")
+        self.setGeometry(200, 200, 400, 400)    # set the windows dimensions
+        self.setStyleSheet("background-color:green")     # sets the window background to green
+        self.game = Game21()    # Imports the gameLogic.py
 
-        # set the windows dimensions
-        self.setGeometry(200, 200, 400, 400)
 
-        self.game = Game21()
+        container = QWidget()
+        mainLayout = QVBoxLayout()
 
+        # Dealer Section at the top
+        self.dealerLabel = QLabel("Dealer Hand :")
+        self.dealerCardsLayout = QVBoxLayout()  # QV : vertical layout  || QH : horizontal layout
+
+        # Player section at the bottom
+        self.playerLabel = QLabel("Player Hand :")
+        self.playerCardsLayout = QVBoxLayout()  # QV : vertical layout  || QH : horizontal layout
+
+        # Buttons at the bottom of the screen
+        buttonsLayout = QHBoxLayout()
+
+        self.hitBtn = QPushButton("Hit")    # Declares hit button
+        self.hitBtn.clicked.connect(self.on_hit)    # Connects btn to "eventHandler"
+
+        self.standBtn = QPushButton("Stand")    # Declares stand button
+        self.standBtn.clicked.connect(self.on_stand)    # Connects btn to "eventHandler"
+
+        self.newRowndBtn = QPushButton("New Round")     # Declares newRound button
+        self.newRowndBtn.clicked.connect(self.new_round_setup)  # Connects btn to "eventHandler"
+
+
+        # Adding buttons and other sections to the layout
+        mainLayout.addWidget(self.dealerLabel)
+        mainLayout.addLayout(self.dealerCardsLayout)
+
+        mainLayout.addWidget(self.playerLabel)
+        mainLayout.addLayout(self.playerCardsLayout)
+
+        buttonsLayout.addWidget(self.hitBtn)
+        buttonsLayout.addWidget(self.standBtn)
+        buttonsLayout.addWidget(self.newRowndBtn)
+
+        mainLayout.addLayout(buttonsLayout)
+
+        container.setLayout(mainLayout)
+        self.setCentralWidget(container)
         self.initUI()
 
     def initUI(self):
