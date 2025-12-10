@@ -87,9 +87,11 @@ class MainWindow(QMainWindow):
         print("Hit")
         # Player takes a card
         card = self.game.player_hit()
+
         self.add_card(self.playerCardsLayout, card)
 
         if card is None:
+            print("No card")
             return  # ignore until logic is ready
 
         if self.game.player_total() > 21:
@@ -118,23 +120,13 @@ class MainWindow(QMainWindow):
                 widget.deleteLater()
 
     def add_card(self, layout, card_text):
-        # Create a QLabel showing the card value and add it to the chosen layout.
-        label = QLabel(card_text)
-        layout.addWidget(label)
-        label.setStyleSheet("""
-               QLabel {
-                   background: white;
-                   border: 2px solid black;
-                   border-radius: 6px;
-                   font-size: 20px;
-                   font-weight: bold;
-                   padding: 10px;
-                   min-width: 40px;
-                   min-height: 60px;
-                   qproperty-alignment: AlignCenter;
-               }
-           """)
-        label.setProperty("card", True)
+        # Pick which slot to use ( player or dealer)
+        slots = self.playerCardsSlots if layout is self.playerCardsLayout else self.dealerCardsSlot
+
+        for label in slots:
+            if label.text() == "":
+                label.setText(card_text)
+                return
 
     def update_dealer_cards(self, full=False):
         # Show dealer cards; hide the first card until revealed
@@ -170,11 +162,6 @@ class MainWindow(QMainWindow):
         # TODO: Disable button actions after the round ends. Remove pass when complete
         pass
 
-    def addCard(self, layout, cardText):
-        label = QLabel(cardText)
-        layout.addWidget(label)
-
-        layout.addWidget(label)
 
     def createCardsSlots(self, layout, numberOfSlots):
         """Creates permanent empty card labels and returns them."""
