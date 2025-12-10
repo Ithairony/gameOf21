@@ -29,11 +29,13 @@ class MainWindow(QMainWindow):
         # Dealer Section at the top
         self.dealerLabel = QLabel("Dealer Hand :")
         self.dealerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
+        self.dealerCardsSlot = self.createCardsSlots(self.dealerCardsLayout, 3 )# Declares a fix layout of 6 cards
 
         # TODO: Player Section with cards
         # Player section at the bottom
         self.playerLabel = QLabel("Player Hand :")
         self.playerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
+        self.playerCardsSlots = self.createCardsSlots(self.playerCardsLayout, 3)  # Declares a fix layout of 6 cards
 
         #  TODO: Buttons for hit, stand, new round
         self.hitBtn = QPushButton("Hit")  # Declares hit button
@@ -51,6 +53,7 @@ class MainWindow(QMainWindow):
         #  TODO: Feedback
         self.feedbackLabel = QLabel("Feedback :")
         self.feedbackLayout = QHBoxLayout()
+
         #  TODO: Add widgets to layout
         container = QWidget()
         mainLayout = QVBoxLayout()
@@ -172,6 +175,27 @@ class MainWindow(QMainWindow):
         layout.addWidget(label)
 
         layout.addWidget(label)
+
+    def createCardsSlots(self, layout, numberOfSlots):
+        """Creates permanent empty card labels and returns them."""
+        slots = []
+
+        for i in range(numberOfSlots):
+            lbl = QLabel("")
+            lbl.setFixedSize(80, 120)
+            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            lbl.setStyleSheet("""
+                   background: white;
+                   border: 2px solid black;
+                   border-radius: 6px;
+                   font-size: 20px;
+                   font-weight: bold;
+               """)
+            layout.addWidget(lbl)
+            slots.append(lbl)
+
+        return slots
+
 
 # complete
 
