@@ -12,34 +12,51 @@ class MainWindow(QMainWindow):
 
         # Window settings
         self.setWindowTitle("Game of 21")
-        self.setGeometry(200, 200, 400, 400)    # set the windows dimensions
+        self.setGeometry(400, 400, 800, 800)    # set the windows dimensions
         self.setStyleSheet("background-color:green")     # sets the window background to green
+
         self.game = Game21()    # Imports the gameLogic.py
 
 
-        container = QWidget()
-        mainLayout = QVBoxLayout()
+        # # Invokes first round UI
+        # self.new_round_setup()
 
+        self.initUI()
+        # self.new_round_setup()
+
+    def initUI(self):
+        # TODO: Dealer Section with cards
         # Dealer Section at the top
         self.dealerLabel = QLabel("Dealer Hand :")
         self.dealerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
 
+        # TODO: Player Section with cards
         # Player section at the bottom
         self.playerLabel = QLabel("Player Hand :")
         self.playerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
 
-        # Buttons at the bottom of the screen
-        buttonsLayout = QHBoxLayout()
+        #  TODO: Buttons for hit, stand, new round
+        self.hitBtn = QPushButton("Hit")  # Declares hit button
+        self.hitBtn.setStyleSheet("padding: 10px; background:white; color: black;")
+        self.hitBtn.clicked.connect(self.on_hit)  # Connects btn to "eventHandler"
 
-        self.hitBtn = QPushButton("Hit")    # Declares hit button
-        self.hitBtn.clicked.connect(self.on_hit)    # Connects btn to "eventHandler"
+        self.standBtn = QPushButton("Stand")  # Declares stand button
+        self.standBtn.setStyleSheet("padding: 10px; background:white; color: black;")
+        self.standBtn.clicked.connect(self.on_stand)  # Connects btn to "eventHandler"
 
-        self.standBtn = QPushButton("Stand")    # Declares stand button
-        self.standBtn.clicked.connect(self.on_stand)    # Connects btn to "eventHandler"
-
-        self.newRowndBtn = QPushButton("New Round")     # Declares newRound button
+        self.newRowndBtn = QPushButton("New Round")  # Declares newRound button
+        self.newRowndBtn.setStyleSheet("padding: 10px; background:white; color: black;")
         self.newRowndBtn.clicked.connect(self.on_new_round)  # Connects btn to "eventHandler"
 
+        #  TODO: Feedback
+        self.feedbackLabel = QLabel("Feedback :")
+        self.feedbackLayout = QHBoxLayout()
+        #  TODO: Add widgets to layout
+        container = QWidget()
+        mainLayout = QVBoxLayout()
+
+        # Buttons at the bottom of the screen
+        buttonsLayout = QHBoxLayout()
 
         # Adding buttons and other sections to the layout
         mainLayout.addWidget(self.dealerLabel)
@@ -51,25 +68,11 @@ class MainWindow(QMainWindow):
         buttonsLayout.addWidget(self.hitBtn)
         buttonsLayout.addWidget(self.standBtn)
         buttonsLayout.addWidget(self.newRowndBtn)
-
+        mainLayout.addWidget(self.feedbackLabel)
         mainLayout.addLayout(buttonsLayout)
 
         container.setLayout(mainLayout)
         self.setCentralWidget(container)
-       # self.initUI()
-
-    def initUI(self):
-        # Create and arrange widgets and layout. Remove pass when complete.
-        pass
-        # TODO: Dealer Section with cards
-
-        # TODO: Player Section with cards
-
-        #  TODO: Buttons for hit, stand, new round
-
-        #  TODO: Feedback
-
-        #  TODO: Add widgets to layout
 
         #  TODO: Trigger a new layout with a new round
 
@@ -78,13 +81,20 @@ class MainWindow(QMainWindow):
     # BUTTON ACTIONS
 
     def on_hit(self):
+        print("Hit")
         # Player takes a card
         card = self.game.player_hit()
         self.add_card(self.playerCardsLayout, card)
 
+        if card is None:
+            return  # ignore until logic is ready
+
         if self.game.player_total() > 21:
-          # TODO: what should happen if a player goes over 21? Remove pass when complete
-          pass
+            # TODO: what should happen if a player goes over 21? Remove pass when complete
+            # Player is busted if goes over 21
+            self.feedbackLabel.setText("Busted")
+            self.end_round()    # Ends round
+
 
     def on_stand(self):
         # TODO: Player ends turn; dealer reveals their hidden card and plays. Remove pass when complete
@@ -108,6 +118,19 @@ class MainWindow(QMainWindow):
         # Create a QLabel showing the card value and add it to the chosen layout.
         label = QLabel(card_text)
         layout.addWidget(label)
+        label.setStyleSheet("""
+               QLabel {
+                   background: white;
+                   border: 2px solid black;
+                   border-radius: 6px;
+                   font-size: 20px;
+                   font-weight: bold;
+                   padding: 10px;
+                   min-width: 40px;
+                   min-height: 60px;
+                   qproperty-alignment: AlignCenter;
+               }
+           """)
         label.setProperty("card", True)
 
     def update_dealer_cards(self, full=False):
@@ -128,19 +151,27 @@ class MainWindow(QMainWindow):
 
     def new_round_setup(self):
         # TODO: Prepare a fresh visual layout
+        self.clear_layout(self.dealerCardsLayout)
+        self.clear_layout(self.playerCardsLayout)
 
         # TODO: update relevant labels (reset dealer and player totals)
 
         # TODO: display new cards for dealers and players
 
         # TODO: enable buttons for Stand and Hit - Remove pass when complete
-        pass
+        self.standBtn.show()
+        self.hitBtn.show()
 
 
     def end_round(self):
         # TODO: Disable button actions after the round ends. Remove pass when complete
         pass
 
+    def addCard(self, layout, cardText):
+        label = QLabel(cardText)
+        layout.addWidget(label)
+
+        layout.addWidget(label)
 
 # complete
 
