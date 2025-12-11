@@ -5,6 +5,7 @@ import sys
 # this project should use a modular approach - try to keep UI logic and game logic separate
 from gameLogic import Game21
 
+# MainWindowClass
 class MainWindow(QMainWindow):
 
     def __init__(self):
