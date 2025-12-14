@@ -131,8 +131,10 @@ def __init__(self):
         return card
 
     def player_total(self):
-        # TODO: Return the player's total. Remove pass when complete.
-        pass
+        """
+        Return the player's hand total.
+        """
+        return self.hand_total(self.player_hand)
 
     # DEALER ACTIONS
 
