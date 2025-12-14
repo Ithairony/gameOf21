@@ -58,10 +58,18 @@ def __init__(self):
     def draw_card(self):
         """
         Return the next card in the shuffled deck.
+        If we reach the end of the deck, start a new shuffled deck.
         """
+        if self.deck_position >= len(self.deck):
+            # Simple reshuffle if somehow we run out of cards
+            self.deck = self.create_deck()
+            random.shuffle(self.deck)
+            self.deck_position = 0
+
         card = self.deck[self.deck_position]
         self.deck_position += 1
         return card
+
 
     # HAND VALUES + ACE HANDLING
 
