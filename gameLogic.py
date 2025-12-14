@@ -1,10 +1,14 @@
 import random
 
-class Game21:
-    def __init__(self):
-        # Start immediately with a fresh round
-        self.new_round()
 
+def __init__(self):
+    # Additional feature: simple statistics tracker
+    self.player_wins = 0
+    self.dealer_wins = 0
+    self.pushes = 0
+
+    # Start immediately with a fresh round
+    self.new_round()
     # ROUND MANAGEMENT
 #ii
     def new_round(self):
