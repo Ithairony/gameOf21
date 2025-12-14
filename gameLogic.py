@@ -1,16 +1,16 @@
 import random
 
+class Game21:
+    def __init__(self):
+        # Additional feature: simple statistics tracker
+        self.player_wins = 0
+        self.dealer_wins = 0
+        self.pushes = 0
 
-def __init__(self):
-    # Additional feature: simple statistics tracker
-    self.player_wins = 0
-    self.dealer_wins = 0
-    self.pushes = 0
+        # Start immediately with a fresh round
+        self.new_round()
 
-    # Start immediately with a fresh round
-    self.new_round()
     # ROUND MANAGEMENT
-#ii
     def new_round(self):
         """
         Prepares for a new round
@@ -70,7 +70,6 @@ def __init__(self):
         self.deck_position += 1
         return card
 
-
     # HAND VALUES + ACE HANDLING
 
     def card_value(self, card):
@@ -99,9 +98,10 @@ def __init__(self):
         Aces are counted as 11 unless this would bust the hand,
         in which case they are reduced to 1.
 
-        Suggested Process:
+        Process:
         1. Count all Aces as 11 initially.
-        2. If total > 21, subtract 10 for each Ace, so it effectively makes them = 1
+        2. If total > 21, subtract 10 for each Ace (turning 11 into 1)
+           until the total is <= 21 or there are no more Aces to adjust.
         """
         total = 0
         aces = 0
@@ -139,28 +139,62 @@ def __init__(self):
     # DEALER ACTIONS
 
     def reveal_dealer_card(self):
-        # TODO: Called when the player presses Stand. After this, the UI should show both dealer cards. Remove pass when complete.
-        pass
-
+        """
+        Called when the player presses Stand. After this, the UI
+        should show both dealer cards.
+        """
+        self.dealer_hidden_revealed = True
 
     def dealer_total(self):
-        # TODO: Return the dealer's total. Remove pass when complete.
-        pass
+        """
+        Return the dealer's hand total.
+        """
+        return self.hand_total(self.dealer_hand)
 
     def play_dealer_turn(self):
-        # TODO: Dealer must hit until their total is 17 or more, then stand.  Remove pass when complete.
-        pass
+        """
+        Dealer must hit until their total is 17 or more, then stand.
+        Aces are handled optimally by hand_total().
+        """
+        # Make sure dealer's hidden card is considered revealed in the logic
+        self.reveal_dealer_card()
+
+        while self.dealer_total() < 17:
+            self.dealer_hand.append(self.draw_card())
 
     # WINNER DETERMINATION
 
     def decide_winner(self):
-        # TODO: Decide the outcome of the round.
         """
-        Example: return the following text messages:
+        Decide the outcome of the round.
+
+        Returns a text message, e.g.:
         - "Player busts. Dealer wins!"
         - "Dealer busts. Player wins!"
         - "Player wins!"
         - "Dealer wins!"
         - "Push (tie)."
         """
+        player_score = self.player_total()
+        dealer_score = self.dealer_total()
 
+        # Player busts
+        if player_score > 21:
+            self.dealer_wins += 1
+            return "Player busts. Dealer wins!"
+
+        # Dealer busts
+        if dealer_score > 21:
+            self.player_wins += 1
+            return "Dealer busts. Player wins!"
+
+        # Neither is bust: higher total wins
+        if player_score > dealer_score:
+            self.player_wins += 1
+            return "Player wins!"
+        elif dealer_score > player_score:
+            self.dealer_wins += 1
+            return "Dealer wins!"
+        else:
+            self.pushes += 1
+            return "Push (tie)."
