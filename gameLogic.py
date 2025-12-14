@@ -103,6 +103,21 @@ def __init__(self):
         1. Count all Aces as 11 initially.
         2. If total > 21, subtract 10 for each Ace, so it effectively makes them = 1
         """
+        total = 0
+        aces = 0
+
+        for card in hand:
+            value = self.card_value(card)
+            total += value
+            if card.startswith("A"):
+                aces += 1
+
+        # Adjust Aces from 11 to 1 if we are bust
+        while total > 21 and aces > 0:
+            total -= 10  # effectively makes one Ace count as 1 instead of 11
+            aces -= 1
+
+        return total
 
     # PLAYER ACTIONS
 
