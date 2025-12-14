@@ -1,11 +1,19 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QHBoxLayout, QPushButton, QWidget, QVBoxLayout
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QLabel,
+    QHBoxLayout,
+    QPushButton,
+    QWidget,
+    QVBoxLayout,
+)
 from PyQt6.QtCore import Qt
 import sys
 
 # this project should use a modular approach - try to keep UI logic and game logic separate
 from gameLogic import Game21
 
-# MainWindowClassi
+# MainWindowClass
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -16,29 +24,28 @@ class MainWindow(QMainWindow):
         self.setGeometry(400, 400, 800, 800)    # set the windows dimensions
         self.setStyleSheet("background-color:green")     # sets the window background to green
 
+        # Game logic model
         self.game = Game21()    # Imports the gameLogic.py
 
-
-        # # Invokes first round UI
-        # self.new_round_setup()
-
         self.initUI()
+        # Optionally start with a round automatically:
+        # self.game.new_round()
         # self.new_round_setup()
 
     def initUI(self):
-        # TODO: Dealer Section with cards
         # Dealer Section at the top
         self.dealerLabel = QLabel("Dealer Hand :")
+        self.dealerTotalLabel = QLabel("Dealer total: ?")
         self.dealerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
-        self.dealerCardsSlot = self.createCardsSlots(self.dealerCardsLayout, 3 )# Declares a fix layout of 6 cards
+        self.dealerCardsSlot = self.createCardsSlots(self.dealerCardsLayout, 3)  # layout for dealer cards
 
-        # TODO: Player Section with cards
         # Player section at the bottom
         self.playerLabel = QLabel("Player Hand :")
+        self.playerTotalLabel = QLabel("Player total: 0")
         self.playerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
-        self.playerCardsSlots = self.createCardsSlots(self.playerCardsLayout, 3)  # Declares a fix layout of 6 cards
+        self.playerCardsSlots = self.createCardsSlots(self.playerCardsLayout, 3)  # layout for player cards
 
-        #  TODO: Buttons for hit, stand, new round
+        # Buttons for hit, stand, new round
         self.hitBtn = QPushButton("Hit")  # Declares hit button
         self.hitBtn.setStyleSheet("padding: 10px; background:white; color: black;")
         self.hitBtn.clicked.connect(self.on_hit)  # Connects btn to "eventHandler"
@@ -51,69 +58,129 @@ class MainWindow(QMainWindow):
         self.newRowndBtn.setStyleSheet("padding: 10px; background:white; color: black;")
         self.newRowndBtn.clicked.connect(self.on_new_round)  # Connects btn to "eventHandler"
 
-        #  TODO: Feedback
+        # Feedback & scoreboard
         self.feedbackLabel = QLabel("Feedback :")
         self.feedbackLayout = QHBoxLayout()
 
-        #  TODO: Add widgets to layout
+        # Additional feature: simple statistics tracker (wins/losses/pushes)
+        self.scoreboardLabel = QLabel("Scoreboard - Player: 0 | Dealer: 0 | Pushes: 0")
+
+        # Overall layout
         container = QWidget()
         mainLayout = QVBoxLayout()
 
         # Buttons at the bottom of the screen
         buttonsLayout = QHBoxLayout()
 
-        # Adding buttons and other sections to the layout
+        # Adding widgets and sections to the layout
         mainLayout.addWidget(self.dealerLabel)
+        mainLayout.addWidget(self.dealerTotalLabel)
         mainLayout.addLayout(self.dealerCardsLayout)
 
         mainLayout.addWidget(self.playerLabel)
+        mainLayout.addWidget(self.playerTotalLabel)
         mainLayout.addLayout(self.playerCardsLayout)
+
+        mainLayout.addWidget(self.feedbackLabel)
+        mainLayout.addWidget(self.scoreboardLabel)
 
         buttonsLayout.addWidget(self.hitBtn)
         buttonsLayout.addWidget(self.standBtn)
         buttonsLayout.addWidget(self.newRowndBtn)
-        mainLayout.addWidget(self.feedbackLabel)
+
         mainLayout.addLayout(buttonsLayout)
 
         container.setLayout(mainLayout)
         self.setCentralWidget(container)
 
-        #  TODO: Trigger a new layout with a new round
-
-
+        # At the very start, we want Hit/Stand disabled until "New Round"
+        self.hitBtn.setEnabled(False)
+        self.standBtn.setEnabled(False)
 
     # BUTTON ACTIONS
 
     def on_hit(self):
-        print("Hit")
-        # Player takes a card
+        """
+        Player takes a card.
+        If they bust (>21), the round ends and the dealer wins.
+        """
         card = self.game.player_hit()
 
+        if card is None:
+            return  # extra safety
+
+        # Display the new player card
         self.add_card(self.playerCardsLayout, card)
 
-        if card is None:
-            print("No card")
-            return  # ignore until logic is ready
+        # Update totals after the hit
+        self.update_totals()
 
+        # Check for bust
         if self.game.player_total() > 21:
-            # TODO: what should happen if a player goes over 21? Remove pass when complete
-            # Player is busted if goes over 21
-            self.feedbackLabel.setText("Busted")
-            self.end_round()    # Ends round
+            # Reveal dealer cards so player can see final state
+            self.game.reveal_dealer_card()
+            self.update_dealer_cards(full=True)
 
+            message = self.game.decide_winner()
+            self.feedbackLabel.setText(message)
+
+            # Update totals and scoreboard at the end of the round
+            self.update_totals()
+            self.update_scoreboard()
+            self.end_round()
 
     def on_stand(self):
-        # TODO: Player ends turn; dealer reveals their hidden card and plays. Remove pass when complete
-        pass
+        """
+        Player ends turn; dealer reveals their hidden card and plays.
+        """
+        # Reveal dealer hidden card
+        self.game.reveal_dealer_card()
+        self.update_dealer_cards(full=True)
+
+        # Dealer plays according to rules (hit until 17 or more)
+        self.game.play_dealer_turn()
+        # Update dealer cards again (in case they drew more cards)
+        self.update_dealer_cards(full=True)
+
+        # Decide winner and show feedback
+        message = self.game.decide_winner()
+        self.feedbackLabel.setText(message)
+
+        # Update totals and scoreboard
+        self.update_totals()
+        self.update_scoreboard()
+
+        # Disable further actions until new round
+        self.end_round()
 
     def on_new_round(self):
+        """
+        Start a brand-new round from the game logic
+        and reset the UI to match it.
+        """
         self.game.new_round()
         self.new_round_setup()
 
     # HELPER METHODS
 
     def clear_layout(self, layout):
-        # Remove all widgets from a layout
+        """
+        Remove all widgets from a layout.
+        NOTE: For card layouts we do not want to delete the labels
+        themselves (they are permanent card slots), so this method
+        should be used only for non-card layouts.
+        """
+        # Protect card layouts from being cleared here
+        if layout in (self.playerCardsLayout, self.dealerCardsLayout):
+            # Just clear the card texts instead of deleting the widgets
+            if layout is self.playerCardsLayout:
+                for lbl in self.playerCardsSlots:
+                    lbl.setText("")
+            else:
+                for lbl in self.dealerCardsSlot:
+                    lbl.setText("")
+            return
+
         while layout.count():
             item = layout.takeAt(0)
             widget = item.widget()
@@ -121,7 +188,11 @@ class MainWindow(QMainWindow):
                 widget.deleteLater()
 
     def add_card(self, layout, card_text):
-        # Pick which slot to use ( player or dealer)
+        """
+        Place a card text into the first empty card slot for the
+        given layout (player or dealer).
+        """
+        # Pick which set of slots to use (player or dealer)
         slots = self.playerCardsSlots if layout is self.playerCardsLayout else self.dealerCardsSlot
 
         for label in slots:
@@ -130,39 +201,100 @@ class MainWindow(QMainWindow):
                 return
 
     def update_dealer_cards(self, full=False):
-        # Show dealer cards; hide the first card until revealed
-        self.clear_layout(self.dealerCardsLayout)
+        """
+        Show dealer cards; hide the first card until revealed.
+        If full=False, first card is shown as "??".
+        If full=True, all cards are shown.
+        """
+        # Clear the text from the dealer slots
+        for lbl in self.dealerCardsSlot:
+            lbl.setText("")
 
+        # Fill slots with current dealer hand
         for i, card in enumerate(self.game.dealer_hand):
             if i == 0 and not full:
                 self.add_card(self.dealerCardsLayout, "??")   # face-down
             else:
                 self.add_card(self.dealerCardsLayout, card)
 
-        # TODO: update relevant labels in response to dealer actions. Remove pass when complete
-        if full:
-            pass
+        # Keep game state flag consistent
+        self.game.dealer_hidden_revealed = full
+
+    def update_totals(self):
+        """
+        Update the labels that show the current totals
+        for player and dealer.
+        """
+        # Player total is always fully visible
+        if self.game.player_hand:
+            self.playerTotalLabel.setText(f"Player total: {self.game.player_total()}")
         else:
-            pass
+            self.playerTotalLabel.setText("Player total: 0")
+
+        # Dealer total is hidden until reveal
+        if not self.game.dealer_hand:
+            self.dealerTotalLabel.setText("Dealer total: 0")
+        else:
+            if self.game.dealer_hidden_revealed:
+                self.dealerTotalLabel.setText(f"Dealer total: {self.game.dealer_total()}")
+            else:
+                # Before reveal, just show that the dealer total is hidden
+                self.dealerTotalLabel.setText("Dealer total: ?")
+
+    def update_scoreboard(self):
+        """
+        Update the scoreboard label using statistics
+        from the Game21 logic.
+        """
+        self.scoreboardLabel.setText(
+            f"Scoreboard - Player: {self.game.player_wins} | "
+            f"Dealer: {self.game.dealer_wins} | "
+            f"Pushes: {self.game.pushes}"
+        )
 
     def new_round_setup(self):
-        # TODO: Prepare a fresh visual layout
-        self.clear_layout(self.dealerCardsLayout)
-        self.clear_layout(self.playerCardsLayout)
+        """
+        Prepare a fresh visual layout for a new round:
+        - Reset feedback message
+        - Clear current card slots
+        - Deal and display new cards for dealer and player
+        - Reset totals and enable Hit/Stand buttons
+        """
+        # Deal initial cards in the game logic
+        self.game.deal_initial_cards()
+        self.game.dealer_hidden_revealed = False
 
-        # TODO: update relevant labels (reset dealer and player totals)
+        # Reset feedback
+        self.feedbackLabel.setText("Feedback :")
 
-        # TODO: display new cards for dealers and players
+        # Clear card slots
+        for lbl in self.playerCardsSlots:
+            lbl.setText("")
+        for lbl in self.dealerCardsSlot:
+            lbl.setText("")
 
-        # TODO: enable buttons for Stand and Hit - Remove pass when complete
-        self.standBtn.show()
-        self.hitBtn.show()
+        # Display dealer cards, with first card hidden
+        self.update_dealer_cards(full=False)
 
+        # Display player cards
+        for card in self.game.player_hand:
+            self.add_card(self.playerCardsLayout, card)
+
+        # Enable buttons for Stand and Hit
+        self.standBtn.setEnabled(True)
+        self.hitBtn.setEnabled(True)
+
+        # Update totals and scoreboard
+        self.update_totals()
+        self.update_scoreboard()
 
     def end_round(self):
-        # TODO: Disable button actions after the round ends. Remove pass when complete
-        pass
-
+        """
+        Disable button actions after the round ends.
+        Player must press 'New Round' to continue.
+        """
+        self.standBtn.setEnabled(False)
+        self.hitBtn.setEnabled(False)
 
     def createCardsSlots(self, layout, numberOfSlots):
         """Creates permanent empty card labels and returns them."""
