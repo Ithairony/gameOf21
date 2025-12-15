@@ -28,14 +28,22 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         # Dealer Section at the top
-        self.dealerLabel = QLabel("Dealer Hand :")
-        self.dealerTotalLabel = QLabel("Dealer total: ?")
+        self.dealerLabel = QLabel("Dealer Hand")
+        self.dealerLabel.setStyleSheet("color: white; font-weight: bold; font-size: 24px;")
+        self.dealerLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.dealerTotalLabel = QLabel("")
+        self.dealerTotalLabel.setStyleSheet("color: gold; font-weight: bold; font-size: 24px;")
+        self.dealerTotalLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.dealerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
         self.dealerCardsSlot = self.createCardsSlots(self.dealerCardsLayout, 3)  # layout for dealer cards
 
         # Player section at the bottom
-        self.playerLabel = QLabel("Player Hand :")
-        self.playerTotalLabel = QLabel("Player total: 0")
+        self.playerLabel = QLabel("Player Hand ")
+        self.playerLabel.setStyleSheet("color: white; font-weight: bold; font-size: 24px;")
+        self.playerLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.playerTotalLabel = QLabel()
+        self.playerTotalLabel.setStyleSheet("margin-top:1px; color: gold; font-weight: bold; font-size: 24px;")
+        self.playerTotalLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.playerCardsLayout = QHBoxLayout()  # QV : vertical layout  || QH : horizontal layout
         self.playerCardsSlots = self.createCardsSlots(self.playerCardsLayout, 3)  # layout for player cards
 
@@ -53,11 +61,13 @@ class MainWindow(QMainWindow):
         self.newRowndBtn.clicked.connect(self.on_new_round)  # Connects btn to "eventHandler"
 
         # Feedback & scoreboard
-        self.feedbackLabel = QLabel("Feedback :")
+        self.feedbackLabel = QLabel("")
         self.feedbackLayout = QHBoxLayout()
 
         # Additional feature: simple statistics tracker (wins/losses/pushes)
-        self.scoreboardLabel = QLabel("Scoreboard - Player: 0 | Dealer: 0 | Pushes: 0")
+        self.scoreboardLabel = QLabel("Player: 0 | Dealer: 0 | Pushes: 0")
+        self.scoreboardLabel.setStyleSheet("color: white; font-weight: bold; font-size: 22px;")
+        self.scoreboardLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Overall layout
         container = QWidget()
@@ -119,7 +129,7 @@ class MainWindow(QMainWindow):
             self.update_dealer_cards(full=True)
 
             message = self.game.decide_winner()
-            self.feedbackLabel.setText(message)
+            self.setFeedback(message)
 
             # Update totals and scoreboard at the end of the round
             self.update_totals()
@@ -141,7 +151,7 @@ class MainWindow(QMainWindow):
 
         # Decide winner and show feedback
         message = self.game.decide_winner()
-        self.feedbackLabel.setText(message)
+        self.setFeedback(message)
 
         # Update totals and scoreboard
         self.update_totals()
@@ -197,7 +207,6 @@ class MainWindow(QMainWindow):
         for label in slots:
             if label.text() == "":
                 label.setText(card_text)
-                label.repaint()
                 return
 
     def update_dealer_cards(self, full=False):
@@ -247,7 +256,7 @@ class MainWindow(QMainWindow):
         from the Game21 logic.
         """
         self.scoreboardLabel.setText(
-            f"Scoreboard - Player: {self.game.player_wins} | "
+            f" Player: {self.game.player_wins} | "
             f"Dealer: {self.game.dealer_wins} | "
             f"Pushes: {self.game.pushes}"
         )
@@ -260,12 +269,18 @@ class MainWindow(QMainWindow):
         - Deal and display new cards for dealer and player
         - Reset totals and enable Hit/Stand buttons
         """
+        self.dealerTotalLabel.setText("")
+
         # Deal initial cards in the game logic
         self.game.deal_initial_cards()
         self.game.dealer_hidden_revealed = False
 
         # Reset feedback
-        self.feedbackLabel.setText("Feedback :")
+        self.feedbackLabel.setText("")
+        self.feedbackLabel.setStyleSheet(
+            "color: white; font-size: 16px;"
+        )
+        self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         # Clear card slots
         for lbl in self.playerCardsSlots:
@@ -317,6 +332,22 @@ class MainWindow(QMainWindow):
             slots.append(lbl)
 
         return slots
+
+    def setFeedback(self, message:str):
+        self.feedbackLabel.setText(message)
+
+        messageLower = message.lower()
+
+        if "player wins" in messageLower:
+            self.feedbackLabel.setStyleSheet("color: lightgreen; font-weight: bold; font-size: 24px;")
+            self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        elif "dealer wins" in messageLower or "player busts" in messageLower:
+            self.feedbackLabel.setStyleSheet( "color: red; font-weight: bold; font-size: 24px;")
+            self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        elif "push" in messageLower or "tie" in messageLower:
+            self.feedbackLabel.setStyleSheet( "color: gold; font-weight: bold; font-size: 24px;")
+            self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
 
 
 # complete
