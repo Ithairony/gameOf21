@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         If they bust (>21), the round ends and the dealer wins.
         """
         card = self.game.player_hit()
-        print("CARD RECEIVED:", repr(card))
+        # print("CARD RECEIVED:", repr(card))
 
         if card is None:
             return  # extra safety
@@ -137,12 +137,17 @@ class MainWindow(QMainWindow):
             # Update totals and scoreboard at the end of the round
             self.update_totals()
             self.update_scoreboard()
+            self.logState("AFTER HIT")
             self.end_round()
 
     def on_stand(self):
         """
         Player ends turn; dealer reveals their hidden card and plays.
         """
+        # Hide hit and stand buttons
+        self.hitBtn.hide()
+        self.standBtn.hide()
+
         # Reveal dealer hidden card
         self.game.reveal_dealer_card()
         self.update_dealer_cards(full=True)
@@ -151,6 +156,7 @@ class MainWindow(QMainWindow):
         self.game.play_dealer_turn()
         # Update dealer cards again (in case they drew more cards)
         self.update_dealer_cards(full=True)
+        self.logState("AFTER STAND / DEALER TURN")
 
         # Decide winner and show feedback
         message = self.game.decide_winner()
@@ -172,6 +178,7 @@ class MainWindow(QMainWindow):
         self.standBtn.show()
         self.game.new_round()
         self.new_round_setup()
+        self.logState("NEW ROUND")
 
     # HELPER METHODS
 
@@ -241,11 +248,11 @@ class MainWindow(QMainWindow):
         if self.game.player_hand:
             self.playerTotalLabel.setText(f"Player total: {self.game.player_total()}")
         else:
-            self.playerTotalLabel.setText("Player total: 0")
+            self.playerTotalLabel.setText("Player total: ")
 
         # Dealer total is hidden until reveal
         if not self.game.dealer_hand:
-            self.dealerTotalLabel.setText("Dealer total: 0")
+            self.dealerTotalLabel.setText("Dealer total: ")
         else:
             if self.game.dealer_hidden_revealed:
                 self.dealerTotalLabel.setText(f"Dealer total: {self.game.dealer_total()}")
@@ -342,16 +349,29 @@ class MainWindow(QMainWindow):
         messageLower = message.lower()
 
         if "player wins" in messageLower:
+            print("Player wins!")
             self.feedbackLabel.setStyleSheet("color: lightgreen; font-weight: bold; font-size: 24px;")
             self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         elif "dealer wins" in messageLower or "player busts" in messageLower:
+            print("Dealer wins!")
             self.feedbackLabel.setStyleSheet( "color: red; font-weight: bold; font-size: 24px;")
             self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         elif "push" in messageLower or "tie" in messageLower:
+            print("Tie")
             self.feedbackLabel.setStyleSheet( "color: gold; font-weight: bold; font-size: 24px;")
             self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-
+    def logState(self, title="STATE"):
+        print(f"\n--- {title} ---")
+        print(f"Player hand: {self.game.player_hand} | total = {self.game.player_total()}")
+        if self.game.dealer_hidden_revealed:
+            print(f"Dealer hand: {self.game.dealer_hand} | total = {self.game.dealer_total()}")
+        else:
+            # hide dealer first card
+            if self.game.dealer_hand:
+                print(f"Dealer hand: ['??', {', '.join(self.game.dealer_hand[1:])}] | total = ?")
+            else:
+                print("Dealer hand: [] | total = ?")
 
 # complete
 

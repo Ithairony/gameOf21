@@ -39,9 +39,9 @@ class Game21:
         Deal two cards each to player and dealer.
         """
         self.player_hand = [self.draw_card(), self.draw_card()]
-        print('Player hand: {}'.format(self.player_hand))
+        # print('Player hand: {}'.format(self.player_hand))
         self.dealer_hand = [self.draw_card(), self.draw_card()]
-        print('Dealer hand: {}'.format(self.dealer_hand))
+       # print('Dealer hand: {}'.format(self.dealer_hand))
 
     # DECK AND CARD DRAWING
 
@@ -130,7 +130,7 @@ class Game21:
         """
         card = self.draw_card()
         self.player_hand.append(card)
-        print('Player hand: {}'.format(self.player_hand) + "\n TOTAL : " + str(self.player_total()))
+        # print('Player hand: {}'.format(self.player_hand) + "\n TOTAL : " + str(self.player_total()))
         return card
 
     def player_total(self):
