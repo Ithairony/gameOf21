@@ -86,6 +86,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
         # At the very start, we want Hit/Stand disabled until "New Round"
+        self.hitBtn.hide()
+        self.standBtn.hide()
         self.hitBtn.setEnabled(False)
         self.standBtn.setEnabled(False)
 
@@ -150,6 +152,8 @@ class MainWindow(QMainWindow):
         Start a brand-new round from the game logic
         and reset the UI to match it.
         """
+        self.hitBtn.show()
+        self.standBtn.show()
         self.game.new_round()
         self.new_round_setup()
 
