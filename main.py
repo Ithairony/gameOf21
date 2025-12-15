@@ -124,6 +124,9 @@ class MainWindow(QMainWindow):
 
         # Check for bust
         if self.game.player_total() > 21:
+            # Hide hit and stand buttons
+            self.hitBtn.hide()
+            self.standBtn.hide()
             # Reveal dealer cards so player can see final state
             self.game.reveal_dealer_card()
             self.update_dealer_cards(full=True)
