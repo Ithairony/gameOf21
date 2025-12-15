@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QHBoxLayout, QPushButton, QWidget, QVBoxLayout)
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
+
 import sys
 
 # this project should use a modular approach - try to keep UI logic and game logic separate
@@ -99,6 +101,7 @@ class MainWindow(QMainWindow):
         If they bust (>21), the round ends and the dealer wins.
         """
         card = self.game.player_hit()
+        print("CARD RECEIVED:", repr(card))
 
         if card is None:
             return  # extra safety
@@ -194,6 +197,7 @@ class MainWindow(QMainWindow):
         for label in slots:
             if label.text() == "":
                 label.setText(card_text)
+                label.repaint()
                 return
 
     def update_dealer_cards(self, full=False):
@@ -300,12 +304,14 @@ class MainWindow(QMainWindow):
             lbl = QLabel("")
             lbl.setFixedSize(80, 120)
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            font = QFont()
+            font.setPointSize(20)
+            font.setBold(True)
+            lbl.setFont(font)
             lbl.setStyleSheet("""
                    background: white;
                    border: 2px solid black;
                    border-radius: 6px;
-                   font-size: 20px;
-                   font-weight: bold;
                """)
             layout.addWidget(lbl)
             slots.append(lbl)
